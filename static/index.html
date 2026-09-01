@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat com seus documentos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar: knowledge base -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">📄</div>
+        <div>
+          <h1>Knowledge Base</h1>
+          <p>Documentos para o RAG</p>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <label class="dropzone" id="dropzone">
+          <input type="file" id="arquivo" accept=".txt,.md,.pdf" hidden />
+          <span class="dropzone-icon">↑</span>
+          <span class="dropzone-text">Arraste ou clique para enviar</span>
+          <span class="dropzone-hint">PDF, TXT, Markdown</span>
+        </label>
+        <p id="upload-msg" class="feedback"></p>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">
+          <span>Arquivos</span>
+          <span id="file-count" class="count">0</span>
+        </div>
+        <ul id="lista-arquivos" class="file-list">
+          <li class="empty">Nenhum documento</li>
+        </ul>
+      </div>
+
+      <div class="sidebar-footer">
+        <button id="btn-indexar" class="btn-index" disabled>
+          <span id="btn-indexar-text">Indexar documentos</span>
+        </button>
+        <div id="index-status" class="index-status">
+          <span id="dot-index" class="dot"></span>
+          <span id="status-text">Aguardando documentos</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main: chat -->
+    <main class="chat">
+      <header class="chat-header">
+        <h2>Chat</h2>
+        <span id="badge-llm" class="pill">Gemini</span>
+      </header>
+
+      <div id="messages" class="messages">
+        <div id="welcome" class="welcome">
+          <div class="welcome-icon">💬</div>
+          <h3>Pergunte sobre seus documentos</h3>
+          <p>Envie arquivos, indexe e pergunte. O <strong>Gemini</strong> responde com base nos trechos encontrados.</p>
+          <div class="suggestions">
+            <button type="button" class="suggestion">Quantos dias de férias?</button>
+            <button type="button" class="suggestion">Como solicitar férias?</button>
+            <button type="button" class="suggestion">Regras na rescisão</button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="composer">
+        <form id="form-pergunta" class="composer-form">
+          <textarea
+            id="pergunta"
+            rows="1"
+            placeholder="Faça uma pergunta sobre os documentos..."
+            disabled
+          ></textarea>
+          <button type="submit" id="btn-enviar" disabled aria-label="Enviar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 19V5M5 12l7-7 7 7"/>
+            </svg>
+          </button>
+        </form>
+        <p class="composer-hint">A resposta vem do Gemini · as fontes abaixo são os trechos usados como contexto</p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

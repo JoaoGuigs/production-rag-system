@@ -1,0 +1,26 @@
+# Ambiente e segredos
+.env
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Dados gerados (recriados ao indexar)
+data/processed/
+
+# Cache de modelos (sentence-transformers / Hugging Face)
+.cache/
+models/
+
+# IDE e SO
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+.DS_Store
