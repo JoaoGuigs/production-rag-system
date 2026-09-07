@@ -67,7 +67,7 @@ def _split_por_caracteres(texto: str, max_tokens: int) -> list[str]:
     return [p for p in pedacos if p]
 
 
-def _unidades_de_texto(texto: str) -> list[str]:
+def _unidades_de_texto(texto: str, max_tokens: int = CHUNK_MAX_TOKENS) -> list[str]:
     """Aplica a hierarquia: headings → parágrafos → frases."""
     unidades: list[str] = []
 
@@ -81,25 +81,25 @@ def _unidades_de_texto(texto: str) -> list[str]:
         for bloco in blocos:
             texto_bloco = f"{titulo}\n\n{bloco}" if titulo else bloco
 
-            if contar_tokens(texto_bloco) <= CHUNK_MAX_TOKENS:
+            if contar_tokens(texto_bloco) <= max_tokens:
                 unidades.append(texto_bloco)
                 continue
 
             frases = _split_por_frases(bloco)
             if len(frases) <= 1:
                 prefixo = f"{titulo}\n\n" if titulo else ""
-                unidades.extend(_split_por_caracteres(prefixo + bloco, CHUNK_MAX_TOKENS))
+                unidades.extend(_split_por_caracteres(prefixo + bloco, max_tokens))
                 continue
 
             acumulo = f"{titulo}\n\n" if titulo else ""
             for frase in frases:
                 candidato = f"{acumulo}{frase}".strip()
-                if contar_tokens(frase) > CHUNK_MAX_TOKENS:
+                if contar_tokens(frase) > max_tokens:
                     if acumulo.strip():
                         unidades.append(acumulo.strip())
                         acumulo = ""
-                    unidades.extend(_split_por_caracteres(frase, CHUNK_MAX_TOKENS))
-                elif contar_tokens(candidato) > CHUNK_MAX_TOKENS:
+                    unidades.extend(_split_por_caracteres(frase, max_tokens))
+                elif contar_tokens(candidato) > max_tokens:
                     if acumulo.strip():
                         unidades.append(acumulo.strip())
                     acumulo = frase
@@ -177,7 +177,7 @@ def dividir_em_chunks(
     if not texto.strip():
         return []
 
-    unidades = _unidades_de_texto(texto)
+    unidades = _unidades_de_texto(texto, max_tokens)
     agrupados = _agrupar_unidades(unidades, max_tokens)
     return _aplicar_overlap(agrupados, overlap_tokens)
 
