@@ -24,3 +24,7 @@ TOP_K = 3
 # LLM — Google Gemini
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 GOOGLE_MODEL = os.getenv("GOOGLE_MODEL", "gemini-3.6-flash")
+
+# Banco vetorial — Postgres + pgvector
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:rag@localhost:5433/rag")
+USAR_PGVECTOR = os.getenv("USAR_PGVECTOR", "false").lower() in ("1", "true", "sim", "yes")
