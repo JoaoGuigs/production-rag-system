@@ -188,10 +188,14 @@ def dividir_em_chunks(
     return _aplicar_overlap(agrupados, overlap_tokens)
 
 
-def chunkar_documento(documento) -> "DocumentoChunkado":
+def chunkar_documento(documento, estrategia: str = "hierarquico") -> "DocumentoChunkado":
+    from src.chunking.fixed import dividir_em_chunks_fixo
     from src.models import Chunk, DocumentoChunkado
 
-    pedacos = dividir_em_chunks(documento.texto_limpo)
+    if estrategia == "fixo":
+        pedacos = dividir_em_chunks_fixo(documento.texto_limpo, CHUNK_MAX_TOKENS, CHUNK_OVERLAP_TOKENS)
+    else:
+        pedacos = dividir_em_chunks(documento.texto_limpo)
     chunks = [
         Chunk(indice=i, texto=texto, fonte=documento.nome)
         for i, texto in enumerate(pedacos)
@@ -199,5 +203,5 @@ def chunkar_documento(documento) -> "DocumentoChunkado":
     return DocumentoChunkado(documento=documento, chunks=chunks)
 
 
-def chunkar_todos(documentos: list) -> list:
-    return [chunkar_documento(documento) for documento in documentos]
+def chunkar_todos(documentos: list, estrategia: str = "hierarquico") -> list:
+    return [chunkar_documento(documento, estrategia) for documento in documentos]

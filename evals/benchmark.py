@@ -80,6 +80,22 @@ def main() -> None:
     finally:
         cfg.EMBEDDING_MODEL = orig_modelo
 
+    print("\nFASE 3 — estratégia de chunking (500/75, modelo padrão)")
+    print(f"{'estrategia':12} {'n_chunks':8} {'Recall@1':8} {'Recall@3':8} {'Recall@5':8} {'MRR':5} tok/perg")
+    from src.chunking.chunker import chunkar_todos
+    from src.embedding.embedder import embedar_todos
+    from src.pipeline import processar_todos
+
+    chunker.CHUNK_MAX_TOKENS, chunker.CHUNK_OVERLAP_TOKENS = 500, 75
+    try:
+        for estrategia in ("hierarquico", "fixo"):
+            documentos = embedar_todos(chunkar_todos(processar_todos(), estrategia))
+            n_chunks = sum(len(d.chunks_embedados) for d in documentos)
+            recall1, recall3, recall5, mrr, tok = avaliar(documentos, itens)
+            print(f"{estrategia:12} {n_chunks:<8} {recall1:<8.0%} {recall3:<8.0%} {recall5:<8.0%} {mrr:<5.2f} {tok:.0f}")
+    finally:
+        chunker.CHUNK_MAX_TOKENS, chunker.CHUNK_OVERLAP_TOKENS = orig_max, orig_overlap
+
 
 if __name__ == "__main__":
     main()

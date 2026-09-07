@@ -2,7 +2,9 @@
   "_meta": {
     "descricao": "Golden set do retrieval: pergunta -> trechos que o top-k deve trazer. Agregado com gate em hit@3.",
     "top_k": 3,
-    "threshold_hit_at_3": 0.8
+    "threshold_hit_at_3": 0.8,
+    "threshold_acerto": 0.9,
+    "threshold_recusa": 1.0
   },
   "itens": [
     {

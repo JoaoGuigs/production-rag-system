@@ -81,6 +81,8 @@ src/
 
 Exemplo de decisão guiada pelo benchmark: o embedding padrão era o MiniLM (Recall@1 = 82%, MRR = 0.89). O `make bench` mostrou o bge-m3 com Recall@1 = 98% (**+16 p.p.**) e MRR = 0.99 (**+11%**), ao mesmo custo de contexto (~760 tokens/pergunta) — por isso virou o padrão. Relatórios em `benchmarks/`.
 
+O segundo tipo de eval (`make eval-resposta`) mede a resposta final do Gemini nas mesmas 44 perguntas: taxa de acerto 98%, citação 100% e recusa correta 100% (ver `benchmarks/2026-09-07-exp02-resposta.md`).
+
 ## Como rodar
 
 ### 1. Instalar dependências
