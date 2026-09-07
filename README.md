@@ -64,7 +64,7 @@ Edite o `.env`:
 
 ```env
 GOOGLE_API_KEY=sua-chave-aqui
-GOOGLE_MODEL=gemini-3.6-flash
+GOOGLE_MODEL=gemini-3.1-flash-lite
 ```
 
 ### 3. Subir a interface web
