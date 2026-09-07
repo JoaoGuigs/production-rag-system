@@ -14,7 +14,7 @@ from src.web.store import indexar, obter_status, responder
 
 STATIC_DIR = BASE_DIR / "static"
 
-app = FastAPI(title="RAG Simples")
+app = FastAPI(title="RAG Lab")
 
 
 class PerguntaRequest(BaseModel):

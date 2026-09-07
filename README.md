@@ -1,6 +1,11 @@
-# RAG Simples
+# RAG Lab — Retrieval-Augmented Generation com benchmarks
 
-Projeto educacional de **RAG (Retrieval-Augmented Generation)** em Python. Você envia documentos, o sistema indexa o conteúdo e responde perguntas com base neles, usando busca semântica + Google Gemini.
+Envie documentos (PDF, Markdown, TXT) e pergunte em linguagem natural: o sistema busca os trechos relevantes e o Google Gemini responde citando as fontes. Tudo local, com qualidade **medida por evals**, não por achismo.
+
+```bash
+make install && make back   # terminal 1
+make front                  # terminal 2 — abre o app
+```
 
 ## Diferenciais
 
