@@ -74,6 +74,8 @@ src/
 
 Último resultado (16 docs, 44 perguntas): bge-m3 com chunk 500/75 — Recall@3 = 100%, MRR = 0.99.
 
+Exemplo de decisão guiada pelo benchmark: o embedding padrão era o MiniLM (Recall@1 = 82%, MRR = 0.89). O `make bench` mostrou o bge-m3 com Recall@1 = 98% (**+16 p.p.**) e MRR = 0.99 (**+11%**), ao mesmo custo de contexto (~760 tokens/pergunta) — por isso virou o padrão. Relatórios em `benchmarks/`.
+
 ## Como rodar
 
 ### 1. Instalar dependências
