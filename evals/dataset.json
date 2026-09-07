@@ -8,148 +8,444 @@
     {
       "id": "ferias-duracao",
       "pergunta": "Quantos dias de férias por ano tem um funcionário com mais de um ano de casa?",
-      "fontes_esperadas": ["exemplo.md"],
-      "ancoras": ["30 dias"]
+      "fontes_esperadas": [
+        "exemplo.md"
+      ],
+      "ancoras": [
+        "30 dias"
+      ]
     },
     {
       "id": "ferias-parcelamento",
       "pergunta": "Posso dividir minhas férias em vários períodos?",
-      "fontes_esperadas": ["exemplo.md"],
-      "ancoras": ["3 períodos"]
+      "fontes_esperadas": [
+        "exemplo.md"
+      ],
+      "ancoras": [
+        "3 períodos"
+      ]
     },
     {
       "id": "ferias-periodo-minimo",
       "pergunta": "Qual é a duração mínima de um período de férias?",
-      "fontes_esperadas": ["exemplo.md"],
-      "ancoras": ["14 dias"]
+      "fontes_esperadas": [
+        "exemplo.md"
+      ],
+      "ancoras": [
+        "14 dias"
+      ]
     },
     {
       "id": "ferias-antecedencia",
       "pergunta": "Com quanta antecedência preciso solicitar férias ao RH?",
-      "fontes_esperadas": ["exemplo.md"],
-      "ancoras": ["antecedência"]
+      "fontes_esperadas": [
+        "exemplo.md"
+      ],
+      "ancoras": [
+        "antecedência"
+      ]
     },
     {
       "id": "ferias-adicional",
       "pergunta": "Além do salário, o que mais recebo durante as férias?",
-      "fontes_esperadas": ["exemplo.md"],
-      "ancoras": ["1/3"]
+      "fontes_esperadas": [
+        "exemplo.md"
+      ],
+      "ancoras": [
+        "1/3"
+      ]
     },
     {
       "id": "ferias-experiencia",
       "pergunta": "Funcionário em período de experiência pode sair de férias?",
-      "fontes_esperadas": ["exemplo.md"],
-      "ancoras": ["proporcionais"]
+      "fontes_esperadas": [
+        "exemplo.md"
+      ],
+      "ancoras": [
+        "proporcionais"
+      ]
     },
     {
       "id": "ferias-rescisao",
       "pergunta": "Como ficam as férias na demissão sem justa causa?",
-      "fontes_esperadas": ["exemplo.md"],
-      "ancoras": ["rescisão"]
+      "fontes_esperadas": [
+        "exemplo.md"
+      ],
+      "ancoras": [
+        "rescisão"
+      ]
     },
     {
       "id": "ferias-trabalhar",
       "pergunta": "É permitido trabalhar enquanto estou de férias?",
-      "fontes_esperadas": ["exemplo.md"],
-      "ancoras": ["permitido trabalhar"]
+      "fontes_esperadas": [
+        "exemplo.md"
+      ],
+      "ancoras": [
+        "permitido trabalhar"
+      ]
     },
     {
       "id": "ferias-salario",
       "pergunta": "Meu salário muda durante as férias?",
-      "fontes_esperadas": ["exemplo.md"],
-      "ancoras": ["Salário normal"]
+      "fontes_esperadas": [
+        "exemplo.md"
+      ],
+      "ancoras": [
+        "Salário normal"
+      ]
     },
     {
       "id": "ferias-direito",
       "pergunta": "Depois de quanto tempo de contrato surge o direito às férias?",
-      "fontes_esperadas": ["exemplo.md"],
-      "ancoras": ["12 meses"]
+      "fontes_esperadas": [
+        "exemplo.md"
+      ],
+      "ancoras": [
+        "12 meses"
+      ]
     },
     {
       "id": "reembolso-refeicao",
       "pergunta": "Qual o limite de reembolso por refeição em viagem a trabalho?",
-      "fontes_esperadas": ["reembolso.md"],
-      "ancoras": ["R$ 80"]
+      "fontes_esperadas": [
+        "reembolso.md"
+      ],
+      "ancoras": [
+        "R$ 80"
+      ]
     },
     {
       "id": "reembolso-prazo",
       "pergunta": "Em quanto tempo após a viagem devo enviar o relatório de despesas?",
-      "fontes_esperadas": ["reembolso.md"],
-      "ancoras": ["5 dias úteis"]
+      "fontes_esperadas": [
+        "reembolso.md"
+      ],
+      "ancoras": [
+        "5 dias úteis"
+      ]
     },
     {
       "id": "reembolso-multa",
       "pergunta": "Uma multa de trânsito em viagem a trabalho pode ser reembolsada?",
-      "fontes_esperadas": ["reembolso.md"],
-      "ancoras": ["multa"]
+      "fontes_esperadas": [
+        "reembolso.md"
+      ],
+      "ancoras": [
+        "multa"
+      ]
     },
     {
       "id": "home-pode",
       "pergunta": "Posso trabalhar em home office?",
-      "fontes_esperadas": ["home-office.md"],
-      "ancoras": ["home office"]
+      "fontes_esperadas": [
+        "home-office.md"
+      ],
+      "ancoras": [
+        "home office"
+      ]
     },
     {
       "id": "home-quem",
       "pergunta": "A partir de quanto tempo de casa posso aderir ao home office?",
-      "fontes_esperadas": ["home-office.md"],
-      "ancoras": ["6 meses"]
+      "fontes_esperadas": [
+        "home-office.md"
+      ],
+      "ancoras": [
+        "6 meses"
+      ]
     },
     {
       "id": "home-internet",
       "pergunta": "Qual a internet mínima exigida para trabalhar de casa?",
-      "fontes_esperadas": ["home-office.md"],
-      "ancoras": ["50 Mbps"]
+      "fontes_esperadas": [
+        "home-office.md"
+      ],
+      "ancoras": [
+        "50 Mbps"
+      ]
     },
     {
       "id": "home-presencial",
       "pergunta": "Existe algum dia obrigatório no escritório?",
-      "fontes_esperadas": ["home-office.md"],
-      "ancoras": ["terça"]
+      "fontes_esperadas": [
+        "home-office.md"
+      ],
+      "ancoras": [
+        "terça"
+      ]
     },
     {
       "id": "beneficios-vr",
       "pergunta": "Qual o valor do vale-refeição?",
-      "fontes_esperadas": ["beneficios.md"],
-      "ancoras": ["R$ 35"]
+      "fontes_esperadas": [
+        "beneficios.md"
+      ],
+      "ancoras": [
+        "R$ 35"
+      ]
     },
     {
       "id": "beneficios-plano",
       "pergunta": "A empresa oferece plano de saúde?",
-      "fontes_esperadas": ["beneficios.md"],
-      "ancoras": ["plano de saúde"]
+      "fontes_esperadas": [
+        "beneficios.md"
+      ],
+      "ancoras": [
+        "plano de saúde"
+      ]
     },
     {
       "id": "beneficios-creche",
       "pergunta": "Existe auxílio-creche? De quanto?",
-      "fontes_esperadas": ["beneficios.md"],
-      "ancoras": ["R$ 500"]
+      "fontes_esperadas": [
+        "beneficios.md"
+      ],
+      "ancoras": [
+        "R$ 500"
+      ]
     },
     {
       "id": "conduta-denuncia",
       "pergunta": "Como denuncio um caso de assédio?",
-      "fontes_esperadas": ["codigo-conduta.md"],
-      "ancoras": ["ouvidoria"]
+      "fontes_esperadas": [
+        "codigo-conduta.md"
+      ],
+      "ancoras": [
+        "ouvidoria"
+      ]
     },
     {
       "id": "conduta-presentes",
       "pergunta": "Posso aceitar presentes de fornecedores?",
-      "fontes_esperadas": ["codigo-conduta.md"],
-      "ancoras": ["R$ 100"]
+      "fontes_esperadas": [
+        "codigo-conduta.md"
+      ],
+      "ancoras": [
+        "R$ 100"
+      ]
     },
     {
       "id": "neg-bonus",
       "pergunta": "A empresa paga bônus anual ou PLR?",
       "modo": "ausencia",
       "fontes_esperadas": [],
-      "ancoras": ["bônus", "PLR", "participação nos lucros"]
+      "ancoras": [
+        "bônus",
+        "PLR",
+        "participação nos lucros"
+      ]
     },
     {
       "id": "neg-auxilio-educacao",
       "pergunta": "A empresa oferece auxílio-educação ou bolsa de estudos?",
       "modo": "ausencia",
       "fontes_esperadas": [],
-      "ancoras": ["auxílio-educação", "auxilio-educacao", "bolsa de estudos"]
+      "ancoras": [
+        "auxílio-educação",
+        "auxilio-educacao",
+        "bolsa de estudos"
+      ]
+    },
+    {
+      "id": "ponto-banco-horas",
+      "pergunta": "Como funcionam as horas extras? Vão para o banco de horas?",
+      "fontes_esperadas": [
+        "ponto-expediente.md"
+      ],
+      "ancoras": [
+        "banco de horas"
+      ]
+    },
+    {
+      "id": "ponto-atraso",
+      "pergunta": "Cheguei 10 minutos atrasado, serei descontado?",
+      "fontes_esperadas": [
+        "ponto-expediente.md"
+      ],
+      "ancoras": [
+        "10 minutos"
+      ]
+    },
+    {
+      "id": "avaliacao-pdi",
+      "pergunta": "O que é o PDI da avaliação de desempenho?",
+      "fontes_esperadas": [
+        "avaliacao-desempenho.md"
+      ],
+      "ancoras": [
+        "PDI"
+      ]
+    },
+    {
+      "id": "avaliacao-ciclo",
+      "pergunta": "De quanto em quanto tempo acontece a avaliação de desempenho?",
+      "fontes_esperadas": [
+        "avaliacao-desempenho.md"
+      ],
+      "ancoras": [
+        "ciclo anual"
+      ]
+    },
+    {
+      "id": "onboarding-buddy",
+      "pergunta": "Quem me acompanha nos primeiros dias? O que é o buddy?",
+      "fontes_esperadas": [
+        "onboarding.md"
+      ],
+      "ancoras": [
+        "buddy"
+      ]
+    },
+    {
+      "id": "onboarding-duracao",
+      "pergunta": "Quanto tempo dura o período de integração de um novato?",
+      "fontes_esperadas": [
+        "onboarding.md"
+      ],
+      "ancoras": [
+        "90 dias"
+      ]
+    },
+    {
+      "id": "saude-cipa",
+      "pergunta": "O que é a CIPA?",
+      "fontes_esperadas": [
+        "saude-seguranca.md"
+      ],
+      "ancoras": [
+        "CIPA"
+      ]
+    },
+    {
+      "id": "saude-exame",
+      "pergunta": "De quanto em quanto tempo faço o exame ocupacional de saúde?",
+      "fontes_esperadas": [
+        "saude-seguranca.md"
+      ],
+      "ancoras": [
+        "exame periódico"
+      ]
+    },
+    {
+      "id": "recesso-fecha",
+      "pergunta": "A empresa fecha no fim do ano?",
+      "fontes_esperadas": [
+        "recesso-fim-ano.md"
+      ],
+      "ancoras": [
+        "recesso"
+      ]
+    },
+    {
+      "id": "recesso-dias",
+      "pergunta": "Em quais dias de dezembro não há expediente?",
+      "fontes_esperadas": [
+        "recesso-fim-ano.md"
+      ],
+      "ancoras": [
+        "26 de dezembro"
+      ]
+    },
+    {
+      "id": "licenca-maternidade",
+      "pergunta": "Quantos dias dura a licença-maternidade?",
+      "fontes_esperadas": [
+        "licencas.md"
+      ],
+      "ancoras": [
+        "120 dias"
+      ]
+    },
+    {
+      "id": "licenca-paternidade",
+      "pergunta": "Pais têm quantos dias de licença quando nasce um filho?",
+      "fontes_esperadas": [
+        "licencas.md"
+      ],
+      "ancoras": [
+        "licença-paternidade"
+      ]
+    },
+    {
+      "id": "viagem-visto",
+      "pergunta": "Vou viajar a trabalho para fora do país: quem cuida do meu visto?",
+      "fontes_esperadas": [
+        "viagens-internacionais.md"
+      ],
+      "ancoras": [
+        "visto"
+      ]
+    },
+    {
+      "id": "viagem-passaporte",
+      "pergunta": "Meu passaporte vence em 3 meses, posso viajar a trabalho?",
+      "fontes_esperadas": [
+        "viagens-internacionais.md"
+      ],
+      "ancoras": [
+        "passaporte"
+      ]
+    },
+    {
+      "id": "desligamento-aviso",
+      "pergunta": "Pedi demissão: preciso cumprir aviso prévio?",
+      "fontes_esperadas": [
+        "desligamento.md"
+      ],
+      "ancoras": [
+        "aviso prévio"
+      ]
+    },
+    {
+      "id": "desligamento-entrevista",
+      "pergunta": "O que é a entrevista de desligamento?",
+      "fontes_esperadas": [
+        "desligamento.md"
+      ],
+      "ancoras": [
+        "entrevista de desligamento"
+      ]
+    },
+    {
+      "id": "treinamento-obrigatorio",
+      "pergunta": "Quais treinamentos todo funcionário precisa fazer?",
+      "fontes_esperadas": [
+        "treinamentos.md"
+      ],
+      "ancoras": [
+        "LGPD"
+      ]
+    },
+    {
+      "id": "treinamento-trilha",
+      "pergunta": "O que é a trilha obrigatória de treinamentos?",
+      "fontes_esperadas": [
+        "treinamentos.md"
+      ],
+      "ancoras": [
+        "trilha obrigatória"
+      ]
+    },
+    {
+      "id": "bemestar-psico",
+      "pergunta": "A empresa oferece apoio psicológico?",
+      "fontes_esperadas": [
+        "bem-estar.md"
+      ],
+      "ancoras": [
+        "psicoterapia"
+      ]
+    },
+    {
+      "id": "bemestar-academia",
+      "pergunta": "Como funciona o benefício de academia?",
+      "fontes_esperadas": [
+        "bem-estar.md"
+      ],
+      "ancoras": [
+        "Gympass"
+      ]
     }
   ]
 }

@@ -52,3 +52,22 @@ def test_embedar_todos_processa_varios_documentos(monkeypatch):
     resultados = embedder.embedar_todos(docs)
     assert [r.nome for r in resultados] == ["a.txt", "b.txt"]
     assert [len(r.chunks_embedados) for r in resultados] == [1, 2]
+
+
+def test_troca_de_modelo_recarrega(monkeypatch):
+    criados = []
+
+    class FakeST:
+        def __init__(self, nome):
+            criados.append(nome)
+
+    monkeypatch.setattr(embedder, "SentenceTransformer", FakeST)
+    monkeypatch.setattr(embedder, "_modelo", None)
+    monkeypatch.setattr(embedder, "_modelo_nome", None)
+    monkeypatch.setattr(embedder.cfg, "EMBEDDING_MODEL", "modelo-a")
+    embedder._obter_modelo()
+    embedder._obter_modelo()
+    assert criados == ["modelo-a"]
+    monkeypatch.setattr(embedder.cfg, "EMBEDDING_MODEL", "modelo-b")
+    embedder._obter_modelo()
+    assert criados == ["modelo-a", "modelo-b"]

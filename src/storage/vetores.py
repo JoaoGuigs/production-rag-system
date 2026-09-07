@@ -11,10 +11,12 @@ from pathlib import Path
 import psycopg
 from psycopg.rows import dict_row
 
-from src.config import DATABASE_URL
+from src.config import DATABASE_URL, dimensao_embedding
 from src.models import Chunk, ChunkEmbedado, ResultadoBusca
 
-SCHEMA = """
+
+def _schema_sql(dims: int) -> str:
+    return f"""
 CREATE EXTENSION IF NOT EXISTS vector;
 
 CREATE TABLE IF NOT EXISTS documentos (
@@ -33,7 +35,7 @@ CREATE TABLE IF NOT EXISTS chunks (
   fonte        TEXT NOT NULL,
   indice       INT NOT NULL,
   texto        TEXT NOT NULL,
-  embedding    vector(384) NOT NULL
+  embedding    vector({dims}) NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS chunks_embedding_hnsw
@@ -47,8 +49,31 @@ def conectar():
 
 
 def inicializar() -> None:
+    dims = dimensao_embedding()  # segue o EMBEDDING_MODEL atual (env)
     with conectar() as conn:
-        conn.execute(SCHEMA)
+        conn.execute(_schema_sql(dims))
+        conn.commit()
+        _migrar_dimensao(conn, dims)
+
+
+def _migrar_dimensao(conn, dims: int) -> None:
+    """Troca de modelo = outra dimensão: limpa o índice antigo e ajusta a coluna.
+
+    Vetor de um modelo não serve para outro, então não há o que preservar —
+    a indexação incremental re-embeda tudo sozinha (o hash inclui o modelo).
+    """
+    linha = conn.execute(
+        "SELECT atttypmod FROM pg_attribute "
+        "WHERE attrelid = 'chunks'::regclass AND attname = 'embedding'"
+    ).fetchone()
+    if linha and linha["atttypmod"] != dims:  # vector(n) guarda typmod = n
+        conn.execute("DELETE FROM documentos")
+        conn.execute("DROP INDEX IF EXISTS chunks_embedding_hnsw")
+        conn.execute(f"ALTER TABLE chunks ALTER COLUMN embedding TYPE vector({dims})")
+        conn.execute(
+            "CREATE INDEX chunks_embedding_hnsw "
+            "ON chunks USING hnsw (embedding vector_cosine_ops)"
+        )
         conn.commit()
 
 

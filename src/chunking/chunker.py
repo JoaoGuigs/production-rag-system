@@ -67,8 +67,10 @@ def _split_por_caracteres(texto: str, max_tokens: int) -> list[str]:
     return [p for p in pedacos if p]
 
 
-def _unidades_de_texto(texto: str, max_tokens: int = CHUNK_MAX_TOKENS) -> list[str]:
+def _unidades_de_texto(texto: str, max_tokens: int | None = None) -> list[str]:
     """Aplica a hierarquia: headings → parágrafos → frases."""
+    if max_tokens is None:
+        max_tokens = CHUNK_MAX_TOKENS  # lido na chamada: permite override por experimento
     unidades: list[str] = []
 
     for titulo, corpo in _split_por_headings(texto):
@@ -161,8 +163,8 @@ def _aplicar_overlap(chunks: list[str], overlap_tokens: int) -> list[str]:
 
 def dividir_em_chunks(
     texto: str,
-    max_tokens: int = CHUNK_MAX_TOKENS,
-    overlap_tokens: int = CHUNK_OVERLAP_TOKENS,
+    max_tokens: int | None = None,
+    overlap_tokens: int | None = None,
 ) -> list[str]:
     """
     Divide texto respeitando estrutura semântica.
@@ -177,6 +179,10 @@ def dividir_em_chunks(
     if not texto.strip():
         return []
 
+    if max_tokens is None:
+        max_tokens = CHUNK_MAX_TOKENS  # lido na chamada: permite override por experimento
+    if overlap_tokens is None:
+        overlap_tokens = CHUNK_OVERLAP_TOKENS
     unidades = _unidades_de_texto(texto, max_tokens)
     agrupados = _agrupar_unidades(unidades, max_tokens)
     return _aplicar_overlap(agrupados, overlap_tokens)

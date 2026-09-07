@@ -12,7 +12,7 @@ PDF / MD / TXT  →  extrair  →  normalizar  →  chunking  →  embeddings  �
 
 1. **Ingestão** — extrai texto de `.pdf`, `.md` e `.txt`, normaliza e salva em `data/processed/`
 2. **Chunking hierárquico** — respeita headings (`#`), parágrafos e frases antes de cortar por tokens (~350 tokens, overlap de 40)
-3. **Embeddings locais** — `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` (sem API paga)
+3. **Embeddings locais** — `BAAI/bge-m3` (sem API paga; veja `make bench`)
 4. **Busca semântica** — similaridade de cosseno, top-K = 3
 5. **Geração** — Google Gemini responde só com base nos trechos encontrados
 

@@ -2,17 +2,19 @@
 
 from sentence_transformers import SentenceTransformer
 
-from src.config import EMBEDDING_MODEL
+from src import config as cfg
 from src.models import ChunkEmbedado, DocumentoChunkado, DocumentoEmbedado
 
 _modelo: SentenceTransformer | None = None
+_modelo_nome: str | None = None
 
 
 def _obter_modelo() -> SentenceTransformer:
-    global _modelo
-    if _modelo is None:
-        print(f"Carregando modelo de embeddings: {EMBEDDING_MODEL}")
-        _modelo = SentenceTransformer(EMBEDDING_MODEL)
+    global _modelo, _modelo_nome
+    if _modelo is None or _modelo_nome != cfg.EMBEDDING_MODEL:
+        print(f"Carregando modelo de embeddings: {cfg.EMBEDDING_MODEL}")
+        _modelo = SentenceTransformer(cfg.EMBEDDING_MODEL)
+        _modelo_nome = cfg.EMBEDDING_MODEL
     return _modelo
 
 

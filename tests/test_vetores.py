@@ -139,3 +139,35 @@ def test_hash_arquivo_e_sha256(tmp_path):
 
 def test_vetor_literal_formata_para_pgvector():
     assert vetores._vetor_literal([1.0, 2.5]) == "[1.0,2.5]"
+
+
+def test_inicializar_migra_quando_dimensao_muda(monkeypatch):
+    from src.config import dimensao_embedding
+
+    conns = _mock_connect(monkeypatch, results=[{"atttypmod": 384}])
+    vetores.inicializar()
+    sqls = [c[1] for c in conns[0].calls]
+    assert any("DELETE FROM documentos" in s for s in sqls)
+    assert any(f"TYPE vector({dimensao_embedding()})" in s for s in sqls)
+    assert any("CREATE INDEX chunks_embedding_hnsw" in s for s in sqls)
+
+
+def test_inicializar_nao_migra_quando_dimensao_igual(monkeypatch):
+    from src.config import dimensao_embedding
+
+    conns = _mock_connect(monkeypatch, results=[{"atttypmod": dimensao_embedding()}])
+    vetores.inicializar()
+    sqls = [c[1] for c in conns[0].calls]
+    assert not any("DELETE FROM documentos" in s for s in sqls)
+    assert not any("ALTER TABLE chunks" in s for s in sqls)
+
+
+def test_modelo_desconhecido_erro_claro():
+    from src.config import dimensao_embedding
+
+    assert dimensao_embedding("BAAI/bge-m3") == 1024
+    try:
+        dimensao_embedding("modelo-inexistente")
+        raise AssertionError("deveria ter levantado ValueError")
+    except ValueError as erro:
+        assert "sem dimensão mapeada" in str(erro)

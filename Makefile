@@ -1,7 +1,7 @@
 PYTHON ?= python
 URL ?= http://127.0.0.1:8000
 
-.PHONY: help install back front cli test eval db
+.PHONY: help install back front cli test eval bench db
 
 help:
 	@echo Comandos disponíveis:
@@ -11,6 +11,7 @@ help:
 	@echo   make cli     - roda o pipeline no terminal
 	@echo   make test    - roda a suíte de testes
 	@echo   make eval    - roda a provinha do retrieval
+	@echo   make bench   - compara chunk/overlap (Recall@3/Recall@5)
 	@echo   make db      - sobe o Postgres + pgvector
 	@echo Uso: terminal 1 rode make back, terminal 2 rode make front
 
@@ -32,6 +33,9 @@ test:
 
 eval:
 	$(PYTHON) -m evals.run
+
+bench:
+	$(PYTHON) -m evals.benchmark
 
 db:
 	docker compose up -d
