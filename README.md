@@ -2,6 +2,14 @@
 
 Projeto educacional de **RAG (Retrieval-Augmented Generation)** em Python. Você envia documentos, o sistema indexa o conteúdo e responde perguntas com base neles, usando busca semântica + Google Gemini.
 
+## Diferenciais
+
+- **Chunking recursivo de verdade** — respeita headings → parágrafos → frases (padrão da indústria, estilo `RecursiveCharacterTextSplitter`), com título da seção grudado no chunk e overlap entre chunks. Tem baseline de janela fixa em `src/chunking/fixed.py` só pra provar o valor no benchmark.
+- **Nada de chute: tudo medido** — `evals/` com golden set de 44 perguntas e `make bench` comparando chunk × modelo de embedding × estratégia (Recall@k, MRR, tokens/pergunta). Decisões como bge-m3 + 500/75 saíram de números, e os relatórios ficam guardados em `benchmarks/`.
+- **Dois modos de busca** — em memória (zero setup) ou Postgres + pgvector no Docker, com indexação incremental (só o que mudou) e migração automática de dimensão ao trocar de embedding.
+- **Resiliente à cota grátis** — retry com backoff em 503/429 do Gemini e mensagens de erro em português.
+- **88 testes pytest** que rodam offline (embeddings e Gemini mockados).
+
 ## O que foi feito
 
 ### Pipeline RAG completo
