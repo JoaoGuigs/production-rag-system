@@ -1,134 +1,115 @@
-"""Eval de RESPOSTA (nível LLM): roda pipeline + Gemini nas perguntas do golden set.
+"""Comando e orquestração da avaliação end-to-end v2 do RAG."""
 
-Métricas v1 (heurísticas determinísticas, sem LLM-as-judge):
-- respondíveis: âncora na resposta (acerto) + fonte citada (citação)
-- sem resposta: frase de recusa E nenhuma âncora alucinada (recusa correta)
-
-Uso:
-    python -m evals.resposta   # ou: make eval-resposta
-
-Custo: ~1 chamada ao Gemini por pergunta (~9% da cota diária gratuita).
-Roda sequencial com pausa entre chamadas para não estourar o RPM.
-"""
-
-import re
+import argparse
 import time
+from datetime import datetime, timezone
+from pathlib import Path
 
-from evals.run import carregar_dataset
+from evals.dataset import DATASET_PADRAO, carregar_dataset
+from evals.judge import julgar
+from evals.metrics import agregar, avaliar_gates, pontuar_resposta
+from evals.report import executar_replay, exibir_relatorio, git_sha, salvar_relatorio
+from src import config
 from src.generation.llm import gerar_resposta
 from src.pipeline import executar_pipeline
 from src.retrieval.search import buscar
 
-ESPERA_ENTRE_CHAMADAS_S = 4
-TOP_K = 3
-
-FRASES_RECUSA = (
-    "não encontrei",
-    "nao encontrei",
-    "não há informação",
-    "não consta",
-    "não possui",
-    "não sei",
-    "não tenho",
-    "nao sei",
-    "não é possível responder",
-    "não posso responder",
-    "sem informação",
-    "não menciona",
-    "não há menção",
-)
+ESPERA_ENTRE_CHAMADAS_S = 4.0
 
 
-def contem_ancora(resposta: str, ancoras: list[str]) -> bool:
-    texto = resposta.lower()
-    return any(a.lower() in texto for a in ancoras)
+def _serializar_chunks(resultados) -> list[dict]:
+    return [{
+        "rank": rank, "fonte": r.chunk_embedado.chunk.fonte,
+        "indice": r.chunk_embedado.chunk.indice,
+        "similaridade": round(float(r.similaridade), 6),
+        "texto": r.chunk_embedado.chunk.texto,
+    } for rank, r in enumerate(resultados, 1)]
 
 
-def eh_recusa(resposta: str) -> bool:
-    texto = resposta.lower()
-    return any(frase in texto for frase in FRASES_RECUSA)
-
-
-def afirma_sem_recusa(resposta: str, ancoras: list[str]) -> bool:
-    """Alucinação de verdade: frase que contém a âncora SEM frase de recusa junto.
-
-    Evita o falso positivo de "Não encontrei informação sobre X" (menciona
-    X recusando, não afirmando).
-    """
-    frases = [f.strip() for f in re.split(r"[.!?…\n]+", resposta) if f.strip()]
-    return any(
-        contem_ancora(frase, ancoras) and not eh_recusa(frase) for frase in frases
-    )
-
-
-def tem_citacao(resposta: str, fontes: list[str]) -> bool:
-    texto = resposta.lower()
-    return any(fonte.lower() in texto for fonte in fontes)
-
-
-def avaliar_item(item: dict, documentos) -> dict:
-    resultados = buscar(item["pergunta"], documentos, top_k=TOP_K)
+def avaliar_item(item: dict, documentos, top_k: int = 3, usar_judge: bool = False) -> dict:
+    inicio_total = time.perf_counter()
+    base = {k: item.get(k) for k in ("id", "category", "question", "answerable", "expected_answer")}
     try:
-        resposta = gerar_resposta(item["pergunta"], resultados)
-    except Exception as erro:
-        return {"id": item["id"], "tipo": "erro", "acerto": 0.0, "detalhe": f"ERRO: {erro}"}
+        inicio = time.perf_counter()
+        resultados = buscar(item["question"], documentos, top_k=top_k)
+        retrieval_ms = (time.perf_counter() - inicio) * 1000
+        chunks = _serializar_chunks(resultados)
+        inicio = time.perf_counter()
+        resposta = gerar_resposta(item["question"], resultados)
+        generation_ms = (time.perf_counter() - inicio) * 1000
 
-    if item.get("modo", "recuperar") == "ausencia":
-        recusa = eh_recusa(resposta)
-        alucinou = afirma_sem_recusa(resposta, item["ancoras"])
-        return {
-            "id": item["id"],
-            "tipo": "recusa",
-            "acerto": 1.0 if (recusa and not alucinou) else 0.0,
-            "detalhe": f"recusa={int(recusa)} alucinou={int(alucinou)} | {resposta[:80]}",
+        registro = {
+            **base, "status": "ok", "answer": resposta, "retrieved_chunks": chunks,
+            **pontuar_resposta(item, resposta, chunks),
+            "latency_ms": {"retrieval": round(retrieval_ms, 2), "generation": round(generation_ms, 2)},
         }
-    acerto = contem_ancora(resposta, item["ancoras"])
-    citacao = tem_citacao(resposta, item["fontes_esperadas"])
-    return {
-        "id": item["id"],
-        "tipo": "ok",
-        "acerto": 1.0 if acerto else 0.0,
-        "citacao": 1.0 if citacao else 0.0,
-        "detalhe": f"ancora={int(acerto)} citacao={int(citacao)} | {resposta[:80]}",
-    }
+        if usar_judge:
+            inicio = time.perf_counter()
+            registro["judge"] = julgar(item["question"], item.get("expected_answer"),
+                                        item["answerable"], resposta, chunks)
+            registro["latency_ms"]["judge"] = round((time.perf_counter() - inicio) * 1000, 2)
+        registro["latency_ms"]["total"] = round((time.perf_counter() - inicio_total) * 1000, 2)
+        return registro
+    except Exception as erro:
+        return {**base, "status": "error", "error": f"{type(erro).__name__}: {erro}",
+                "answer": None, "retrieved_chunks": [], "retrieval_hit": None,
+                "reciprocal_rank": None, "metrics": {},
+                "latency_ms": {"total": round((time.perf_counter() - inicio_total) * 1000, 2)}}
 
 
-def main() -> int:
-    dataset = carregar_dataset()
-    meta = dataset.get("_meta", {})
+def criar_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Avaliação end-to-end v2 do RAG")
+    parser.add_argument("--dataset", default=str(DATASET_PADRAO))
+    parser.add_argument("--output")
+    parser.add_argument("--top-k", type=int)
+    parser.add_argument("--interval", type=float, default=ESPERA_ENTRE_CHAMADAS_S)
+    parser.add_argument("--judge", action="store_true", help="usa juiz LLM; dobra as chamadas")
+    parser.add_argument("--replay", help="recalcula métricas de um artefato sem chamar o RAG")
+    return parser
+
+
+def executar(args: argparse.Namespace) -> tuple[dict, list[str], Path]:
+    dataset_path, dataset = Path(args.dataset), carregar_dataset(Path(args.dataset))
+    if args.replay:
+        return executar_replay(args, dataset, dataset_path)
+    meta = dataset["_meta"]
+    top_k = args.top_k or int(meta.get("top_k", config.TOP_K))
     print("Indexando documentos ...")
+    inicio = time.perf_counter()
     documentos = executar_pipeline()
+    corpus_extra = config.BASE_DIR / "data" / "eval_raw"
+    if corpus_extra.exists():
+        documentos.extend(executar_pipeline(corpus_extra))
+    indexacao_ms = (time.perf_counter() - inicio) * 1000
+    registros = []
+    for i, item in enumerate(dataset["items"], 1):
+        print(f"[{i}/{len(dataset['items'])}] {item['id']} ...")
+        registros.append(avaliar_item(item, documentos, top_k, args.judge))
+        if i < len(dataset["items"]) and args.interval > 0:
+            time.sleep(args.interval)
+    resumo = agregar(registros, args.judge)
+    falhas = avaliar_gates(resumo, meta.get("thresholds", {}), args.judge)
+    relatorio = {
+        "schema_version": 2, "created_at": datetime.now(timezone.utc).isoformat(), "git_sha": git_sha(),
+        "dataset": {"path": str(dataset_path), "name": meta.get("name"), "version": 2},
+        "configuration": {"embedding_model": config.EMBEDDING_MODEL, "llm_model": config.GOOGLE_MODEL,
+                          "chunk_max_tokens": config.CHUNK_MAX_TOKENS,
+                          "chunk_overlap_tokens": config.CHUNK_OVERLAP_TOKENS,
+                          "top_k": top_k, "judge_enabled": args.judge},
+        "indexing": {"documents": len(documentos),
+                     "chunks": sum(len(d.chunks_embedados) for d in documentos),
+                     "latency_ms": round(indexacao_ms, 2)},
+        "summary": resumo, "gate": {"passed": not falhas, "failures": falhas}, "results": registros,
+    }
+    destino = salvar_relatorio(relatorio, Path(args.output) if args.output else None)
+    return relatorio, falhas, destino
 
-    linhas = []
-    itens = dataset["itens"]
-    for i, item in enumerate(itens):
-        print(f"[{i + 1}/{len(itens)}] {item['id']} ...")
-        linhas.append(avaliar_item(item, documentos))
-        if i < len(itens) - 1:
-            time.sleep(ESPERA_ENTRE_CHAMADAS_S)
 
-    print(f"\n{'id':24} {'tipo':7} {'acerto':6} detalhe")
-    for linha in linhas:
-        print(f"{linha['id']:24} {linha['tipo']:7} {linha['acerto']:<6.0f} {linha['detalhe']}")
-
-    resp = [l for l in linhas if l["tipo"] == "ok"]
-    recs = [l for l in linhas if l["tipo"] == "recusa"]
-    taxa_acerto = sum(l["acerto"] for l in resp) / len(resp) if resp else 1.0
-    taxa_citacao = sum(l.get("citacao", 0) for l in resp) / len(resp) if resp else 1.0
-    taxa_recusa = sum(l["acerto"] for l in recs) / len(recs) if recs else 1.0
-    print(
-        f"\nRespondíveis ({len(resp)}): acerto={taxa_acerto:.0%} citacao={taxa_citacao:.0%} | "
-        f"Sem resposta ({len(recs)}): recusa_correta={taxa_recusa:.0%}"
-    )
-
-    ok = True
-    for nome, valor in (("threshold_acerto", taxa_acerto), ("threshold_recusa", taxa_recusa)):
-        if nome in meta and valor < meta[nome]:
-            print(f"FAIL: {nome}={valor:.2f} abaixo de {meta[nome]}")
-            ok = False
-    if ok:
-        print("PASS")
-    return 0 if ok else 1
+def main(argv: list[str] | None = None) -> int:
+    args = criar_parser().parse_args(argv)
+    relatorio, falhas, destino = executar(args)
+    exibir_relatorio(relatorio, falhas, destino, args.judge)
+    return int(bool(falhas))
 
 
 if __name__ == "__main__":
