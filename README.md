@@ -10,10 +10,10 @@ make front                  # terminal 2 — abre o app
 ## Diferenciais
 
 - **Chunking recursivo de verdade** — respeita headings → parágrafos → frases (padrão da indústria, estilo `RecursiveCharacterTextSplitter`), com título da seção grudado no chunk e overlap entre chunks. Tem baseline de janela fixa em `src/chunking/fixed.py` só pra provar o valor no benchmark.
-- **Nada de chute: tudo medido** — `evals/` com golden set de 44 perguntas e `make bench` comparando chunk × modelo de embedding × estratégia (Recall@k, MRR, tokens/pergunta). Decisões como bge-m3 + 500/75 saíram de números, e os relatórios ficam guardados em `benchmarks/`.
+- **Nada de chute: tudo medido** — golden set de retrieval, answer eval v2 e benchmark comparando chunk × modelo de embedding × estratégia. Cada execução end-to-end salva respostas, chunks, configuração, erros e latências em JSON.
 - **Dois modos de busca** — em memória (zero setup) ou Postgres + pgvector no Docker, com indexação incremental (só o que mudou) e migração automática de dimensão ao trocar de embedding.
 - **Resiliente à cota grátis** — retry com backoff em 503/429 do Gemini e mensagens de erro em português.
-- **88 testes pytest** que rodam offline (embeddings e Gemini mockados).
+- **Suíte pytest offline** com embeddings e Gemini mockados.
 
 ## O que foi feito
 
@@ -66,8 +66,10 @@ src/
 | `make front` | abre o navegador no app |
 | `make install` | instala dependências e cria o `.env` |
 | `make cli` | roda o pipeline no terminal |
-| `make test` | suíte de testes (88 testes) |
+| `make test` | suíte de testes offline |
 | `make eval` | provinha do retrieval (44 perguntas, com gate) |
+| `make eval-resposta` | eval end-to-end v2 (24 perguntas, com gate e artefato JSON) |
+| `make eval-resposta-judge` | mesma avaliação com juiz LLM opcional |
 | `make bench` | benchmark: chunk × modelo × estratégia |
 | `make db` | sobe o Postgres + pgvector |
 
@@ -75,13 +77,27 @@ src/
 
 - `evals/dataset.json` — golden set: pergunta → trechos esperados (âncoras, robustas a mudanças de chunking)
 - `make eval` — hit@3 + MRR, reprova abaixo do threshold
+- `evals/answer_dataset.json` — conjunto independente com fatos obrigatórios, afirmações proibidas, evidências e 8 casos sem resposta
+- A avaliação de respostas é organizada em `resposta.py` (comando e execução), `dataset.py` (leitura e validação), `metrics.py` (pontuação e gates), `report.py` (relatórios e replay) e `judge.py` (juiz LLM opcional).
+- `make eval-resposta` — mede retrieval + resposta, citações, recusa, erros e latência; salva o resultado completo em `evals/results/`
+- `make eval-resposta-judge` — adiciona correctness, groundedness e citation correctness avaliados pelo Gemini
 - `make bench` — 3 fases: tamanho de chunk, modelo de embedding e estratégia (hierárquico vs janela fixa), com Recall@k, MRR e tokens/pergunta
 
 Último resultado (16 docs, 44 perguntas): bge-m3 com chunk 500/75 — Recall@3 = 100%, MRR = 0.99.
 
 Exemplo de decisão guiada pelo benchmark: o embedding padrão era o MiniLM (Recall@1 = 82%, MRR = 0.89). O `make bench` mostrou o bge-m3 com Recall@1 = 98% (**+16 p.p.**) e MRR = 0.99 (**+11%**), ao mesmo custo de contexto (~760 tokens/pergunta) — por isso virou o padrão. Relatórios em `benchmarks/`.
 
-O segundo tipo de eval (`make eval-resposta`) mede a resposta final do Gemini nas mesmas 44 perguntas: taxa de acerto 98%, citação 100% e recusa correta 100% (ver `benchmarks/2026-09-07-exp02-resposta.md`).
+O `make eval-resposta` usa 24 perguntas separadas do golden de retrieval: 16 respondíveis com múltiplos fatos e 8 negativas. Quatro manuais maiores em `data/eval_raw/` adicionam redundância e assuntos próximos sem alterar a base padrão do aplicativo. O gate falha se uma chamada der erro ou se qualquer métrica crítica ficar abaixo do limite. O relatório anterior, baseado nas heurísticas v1, permanece em `benchmarks/2026-09-07-exp02-resposta.md` como histórico do experimento.
+
+Exemplos:
+
+```bash
+make eval-resposta                         # 24 chamadas, avaliação determinística
+make eval-resposta-judge                   # 48 chamadas: resposta + juiz
+python -m evals.resposta --interval 0      # sem pausa entre chamadas
+python -m evals.resposta --output run.json # destino explícito do artefato
+python -m evals.resposta --replay run.json # recalcula métricas sem novas chamadas
+```
 
 ## Como rodar
 
@@ -140,13 +156,14 @@ python main.py "quantos dias de férias?"
 | Banco vetorial | Postgres + pgvector (opcional) |
 | LLM | Google Gemini (`google-genai`) |
 | PDF | pypdf |
-| Testes | pytest (88 testes, mocks — roda offline) |
+| Testes | pytest (mocks — roda offline) |
 | Frontend | HTML, CSS e JavaScript vanilla |
 
 ## Observações
 
 - Sem pgvector, o índice fica **em memória** — ao reiniciar o servidor, é preciso indexar de novo. Com `USAR_PGVECTOR=true`, o índice persiste e a reindexação é incremental (hash por arquivo + modelo).
 - Arquivos em `data/processed/` são gerados automaticamente; não vão pro Git.
+- Artefatos de `evals/results/` são gerados automaticamente e não vão para o Git.
 - PDFs sem markdown (`#`, `\n\n`) caem no fallback do chunking por frases/tokens.
 - Na primeira execução, cada modelo de embeddings é baixado do Hugging Face (bge-m3 tem ~2GB).
 - `CHUNK_MAX_TOKENS`, `CHUNK_OVERLAP_TOKENS` e `EMBEDDING_MODEL` aceitam override via env.
@@ -164,9 +181,10 @@ python main.py "quantos dias de férias?"
 ├── .env.example         # modelo de variáveis (sem chave real)
 ├── data/
 │   ├── raw/             # documentos originais (16 docs de RH + CV)
+│   ├── eval_raw/        # corpus adicional e mais difícil usado só no answer eval
 │   └── processed/       # gerado pelo pipeline (ignorado no Git)
-├── evals/               # golden set + runner + benchmark
-├── tests/               # suíte pytest (88 testes)
+├── evals/               # datasets, runners, judge opcional e benchmark
+├── tests/               # suíte pytest offline
 ├── scripts/             # front.py, ensure_env.py
 ├── static/              # frontend
 └── src/                 # código do RAG

@@ -13,6 +13,7 @@ __pycache__/
 
 # Dados gerados (recriados ao indexar)
 data/processed/
+evals/results/*.json
 
 # Cache de modelos (sentence-transformers / Hugging Face)
 .cache/
