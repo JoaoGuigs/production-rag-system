@@ -1,0 +1,306 @@
+{
+  "_meta": {
+    "name": "rag-lab-answer-eval",
+    "version": 2,
+    "description": "Conjunto independente para avaliar retrieval e resposta final.",
+    "top_k": 3,
+    "thresholds": {
+      "minimum": {
+        "retrieval_recall_at_k": 0.85,
+        "answer_accuracy": 0.80,
+        "fact_completeness": 0.85,
+        "expected_citation_rate": 0.85,
+        "citation_precision": 0.95,
+        "correct_refusal_rate": 0.75
+      },
+      "maximum": {
+        "error_rate": 0.0,
+        "hallucination_rate": 0.10
+      },
+      "judge_minimum": {
+        "correctness": 0.80,
+        "groundedness": 0.90,
+        "citation_correctness": 0.85
+      }
+    }
+  },
+  "items": [
+    {
+      "id": "ferias-elegibilidade-completa",
+      "category": "multi_fact",
+      "question": "Quando passo a ter direito a férias e quantos dias recebo por ano?",
+      "answerable": true,
+      "expected_answer": "Após mais de 12 meses de contrato, o funcionário tem direito a 30 dias de férias por ano.",
+      "expected_sources": ["exemplo.md", "manual-pessoas-2026.md"],
+      "expected_evidence": ["mais de 12 meses", "30 dias"],
+      "required_facts": [
+        {"label": "carência de 12 meses", "any_of": ["12 meses", "1 ano"]},
+        {"label": "30 dias por ano", "any_of": ["30 dias"]}
+      ],
+      "forbidden_claims": ["6 meses de contrato", "20 dias de férias"]
+    },
+    {
+      "id": "ferias-fracionamento-regras",
+      "category": "multi_fact",
+      "question": "Quero fracionar minhas férias. Quais são o limite de períodos, o período mínimo e a antecedência do pedido?",
+      "answerable": true,
+      "expected_answer": "Até 3 períodos; um deles deve ter no mínimo 14 dias; o pedido deve ser enviado com 30 dias de antecedência.",
+      "expected_sources": ["exemplo.md", "manual-pessoas-2026.md"],
+      "expected_evidence": ["3 períodos", "14 dias"],
+      "required_facts": [
+        {"label": "até 3 períodos", "any_of": ["3 períodos", "três períodos"]},
+        {"label": "mínimo de 14 dias", "any_of": ["14 dias", "quatorze dias"]},
+        {"label": "30 dias de antecedência", "any_of": ["30 dias de antecedência", "antecedência de 30 dias"]}
+      ],
+      "forbidden_claims": ["15 dias de antecedência"]
+    },
+    {
+      "id": "reembolso-refeicao-e-prazo",
+      "category": "multi_fact",
+      "question": "Em uma viagem, qual é o teto por refeição e até quando devo prestar contas?",
+      "answerable": true,
+      "expected_answer": "O limite é R$ 80 por refeição e o relatório deve ser enviado em até 5 dias úteis após o retorno.",
+      "expected_sources": ["reembolso.md", "manual-viagens-2026.md"],
+      "expected_evidence": ["R$ 80", "5 dias úteis"],
+      "required_facts": [
+        {"label": "limite de R$ 80", "any_of": ["R$ 80", "80 reais"]},
+        {"label": "prazo de 5 dias úteis", "any_of": ["5 dias úteis", "cinco dias úteis"]}
+      ],
+      "forbidden_claims": ["R$ 100 por refeição", "10 dias úteis após o retorno"]
+    },
+    {
+      "id": "reembolso-itens-proibidos",
+      "category": "list",
+      "question": "Quais despesas de viagem a política diz explicitamente que não reembolsa?",
+      "answerable": true,
+      "expected_answer": "Multas de trânsito ou estacionamento, bebidas alcoólicas e despesas pessoais sem relação com o trabalho.",
+      "expected_sources": ["reembolso.md", "manual-viagens-2026.md"],
+      "expected_evidence": ["Multas de trânsito", "Bebidas alcoólicas"],
+      "required_facts": [
+        {"label": "multas", "any_of": ["multas de trânsito", "multas de estacionamento"]},
+        {"label": "bebidas alcoólicas", "any_of": ["bebidas alcoólicas", "bebida alcoólica"]},
+        {"label": "despesas pessoais", "any_of": ["despesas pessoais", "gastos pessoais"]}
+      ],
+      "forbidden_claims": ["multas são reembolsadas", "bebidas alcoólicas são reembolsadas"]
+    },
+    {
+      "id": "home-office-elegibilidade",
+      "category": "multi_fact",
+      "question": "Com quatro meses de empresa já posso trabalhar remotamente quatro dias por semana?",
+      "answerable": true,
+      "expected_answer": "Não. A adesão exige mais de 6 meses de contrato e aprovação do gestor; então são permitidos até 4 dias por semana.",
+      "expected_sources": ["home-office.md", "manual-pessoas-2026.md"],
+      "expected_evidence": ["6 meses", "4 dias por semana"],
+      "required_facts": [
+        {"label": "mais de 6 meses", "any_of": ["6 meses", "seis meses"]},
+        {"label": "aprovação do gestor", "any_of": ["aprovação do gestor", "gestor aprovar"]},
+        {"label": "até 4 dias", "any_of": ["4 dias por semana", "quatro dias por semana"]}
+      ],
+      "forbidden_claims": ["com quatro meses já pode", "não precisa de aprovação"]
+    },
+    {
+      "id": "beneficio-saude-condicoes",
+      "category": "multi_fact",
+      "question": "Quando começa o plano de saúde e quais custos ficam com o funcionário?",
+      "answerable": true,
+      "expected_answer": "Começa após 3 meses de contrato, não tem mensalidade e possui coparticipação de 20% em consultas.",
+      "expected_sources": ["beneficios.md", "manual-beneficios-2026.md"],
+      "expected_evidence": ["3 meses", "coparticipação de 20%"],
+      "required_facts": [
+        {"label": "após 3 meses", "any_of": ["3 meses", "três meses"]},
+        {"label": "sem mensalidade", "any_of": ["sem custo mensal", "sem mensalidade", "não possui custo mensal"]},
+        {"label": "coparticipação de 20%", "any_of": ["20%", "vinte por cento"]}
+      ],
+      "forbidden_claims": ["coparticipação de 30%", "desde o primeiro dia"]
+    },
+    {
+      "id": "presente-fornecedor-limite",
+      "category": "conditional",
+      "question": "Recebi de um fornecedor um presente de R$ 180. Posso ficar com ele?",
+      "answerable": true,
+      "expected_answer": "Não. Só brindes de até R$ 100 podem ser aceitos; acima disso, deve recusar ou entregar ao RH para sorteio.",
+      "expected_sources": ["codigo-conduta.md", "manual-compliance-2026.md"],
+      "expected_evidence": ["R$ 100", "entregue ao RH"],
+      "required_facts": [
+        {"label": "limite de R$ 100", "any_of": ["R$ 100", "100 reais"]},
+        {"label": "recusar ou entregar ao RH", "any_of": ["recuse ou entregue ao RH", "recusar ou entregar ao RH", "recusado ou entregue ao RH", "entregar ao RH"]}
+      ],
+      "forbidden_claims": ["pode ficar com o presente", "limite de R$ 200"]
+    },
+    {
+      "id": "banco-horas-validade-limite",
+      "category": "multi_fact",
+      "question": "Por quanto tempo vale o banco de horas e qual saldo positivo exige agendar compensação?",
+      "answerable": true,
+      "expected_answer": "As horas valem por 6 meses e não se pode acumular mais de 20 horas positivas sem agendar compensação.",
+      "expected_sources": ["ponto-expediente.md", "manual-pessoas-2026.md"],
+      "expected_evidence": ["validade de 6 meses", "20 horas positivas"],
+      "required_facts": [
+        {"label": "validade de 6 meses", "any_of": ["6 meses", "seis meses"]},
+        {"label": "limite de 20 horas", "any_of": ["20 horas", "vinte horas"]}
+      ],
+      "forbidden_claims": ["validade de 12 meses", "limite de 40 horas"]
+    },
+    {
+      "id": "promocao-criterios",
+      "category": "multi_fact",
+      "question": "Em quais meses há promoção e quais condições são necessárias?",
+      "answerable": true,
+      "expected_answer": "As promoções ocorrem em abril e outubro e exigem nota mínima 4, vaga aberta e decisão do comitê de talentos.",
+      "expected_sources": ["avaliacao-desempenho.md", "manual-pessoas-2026.md"],
+      "expected_evidence": ["abril e outubro", "nota mínima 4"],
+      "required_facts": [
+        {"label": "abril e outubro", "any_of": ["abril e outubro", "abril", "outubro"]},
+        {"label": "nota mínima 4", "any_of": ["nota mínima 4", "nota 4"]},
+        {"label": "vaga aberta", "any_of": ["vaga aberta"]},
+        {"label": "comitê de talentos", "any_of": ["comitê de talentos"]}
+      ],
+      "forbidden_claims": ["promoção automática", "nota mínima 3"]
+    },
+    {
+      "id": "onboarding-buddy-papel",
+      "category": "definition",
+      "question": "O buddy é meu chefe e avalia formalmente meu desempenho?",
+      "answerable": true,
+      "expected_answer": "Não. O buddy é um colega experiente que apoia nas primeiras semanas e não é o gestor.",
+      "expected_sources": ["onboarding.md", "manual-pessoas-2026.md"],
+      "expected_evidence": ["não é o gestor", "colega experiente"],
+      "required_facts": [
+        {"label": "colega experiente", "any_of": ["colega experiente", "um par"]},
+        {"label": "não é o gestor", "any_of": ["não é o gestor", "não é o seu gestor", "nao e o gestor"]}
+      ],
+      "forbidden_claims": ["buddy é o gestor", "faz a avaliação formal"]
+    },
+    {
+      "id": "recesso-e-ferias",
+      "category": "conditional",
+      "question": "Os dias do recesso coletivo reduzem meu saldo de férias? E quando ocorre o recesso?",
+      "answerable": true,
+      "expected_answer": "Não. O recesso ocorre de 26 de dezembro a 1º de janeiro e os dias são abonados pela empresa.",
+      "expected_sources": ["recesso-fim-ano.md", "manual-pessoas-2026.md"],
+      "expected_evidence": ["26 de dezembro", "não é descontado"],
+      "required_facts": [
+        {"label": "26 de dezembro a 1º de janeiro", "any_of": ["26 de dezembro", "26/12"]},
+        {"label": "não reduz férias", "any_of": ["não é descontado", "não reduz", "dias abonados"]}
+      ],
+      "forbidden_claims": ["descontado das férias"]
+    },
+    {
+      "id": "licenca-paternidade-procedimento",
+      "category": "multi_fact",
+      "question": "Quantos dias tenho de licença-paternidade e qual documento e prazo devo observar?",
+      "answerable": true,
+      "expected_answer": "São 20 dias corridos; a certidão de nascimento deve ser entregue ao RH em até 5 dias úteis após o parto.",
+      "expected_sources": ["licencas.md", "manual-pessoas-2026.md"],
+      "expected_evidence": ["20 dias corridos", "certidão de nascimento"],
+      "required_facts": [
+        {"label": "20 dias corridos", "any_of": ["20 dias corridos", "vinte dias corridos"]},
+        {"label": "certidão de nascimento", "any_of": ["certidão de nascimento"]},
+        {"label": "5 dias úteis", "any_of": ["5 dias úteis", "cinco dias úteis"]}
+      ],
+      "forbidden_claims": ["5 dias de licença-paternidade"]
+    },
+    {
+      "id": "viagem-passaporte-visto",
+      "category": "multi_fact",
+      "question": "Para uma viagem internacional, qual validade o passaporte precisa ter e quem conduz o visto?",
+      "answerable": true,
+      "expected_answer": "O passaporte deve valer por pelo menos 6 meses após o retorno. O RH conduz o visto, e o funcionário comparece às entrevistas.",
+      "expected_sources": ["viagens-internacionais.md", "manual-viagens-2026.md"],
+      "expected_evidence": ["6 meses após", "RH cuida do processo de visto"],
+      "required_facts": [
+        {"label": "validade de 6 meses após retorno", "any_of": ["6 meses após", "seis meses após"]},
+        {"label": "RH cuida do visto", "any_of": ["RH cuida", "RH conduz", "RH coordena", "coordenado pelo RH"]},
+        {"label": "funcionário vai às entrevistas", "any_of": ["comparecer às entrevistas", "comparece às entrevistas"]}
+      ],
+      "forbidden_claims": ["passaporte válido por 3 meses", "funcionário cuida sozinho do visto"]
+    },
+    {
+      "id": "desligamento-dois-prazos",
+      "category": "multi_fact",
+      "question": "Ao pedir demissão, qual é o aviso prévio e até quando recebo as verbas rescisórias?",
+      "answerable": true,
+      "expected_answer": "O aviso prévio é de 30 dias, trabalhado ou indenizado, e as verbas são pagas em até 10 dias após o último dia.",
+      "expected_sources": ["desligamento.md", "manual-pessoas-2026.md"],
+      "expected_evidence": ["aviso prévio de 30 dias", "em até 10 dias"],
+      "required_facts": [
+        {"label": "aviso de 30 dias", "any_of": ["30 dias", "trinta dias"]},
+        {"label": "trabalhado ou indenizado", "any_of": ["trabalhado ou indenizado"]},
+        {"label": "verbas em até 10 dias", "any_of": ["até 10 dias", "em 10 dias"]}
+      ],
+      "forbidden_claims": ["aviso prévio de 15 dias"]
+    },
+    {
+      "id": "treinamentos-trilha",
+      "category": "list",
+      "question": "Quais temas compõem a trilha obrigatória e qual é a nota mínima nas provas?",
+      "answerable": true,
+      "expected_answer": "Segurança da informação, LGPD e privacidade, ética e compliance; cada prova exige nota mínima 7.",
+      "expected_sources": ["treinamentos.md", "manual-compliance-2026.md"],
+      "expected_evidence": ["segurança da informação", "nota mínima 7"],
+      "required_facts": [
+        {"label": "segurança da informação", "any_of": ["segurança da informação"]},
+        {"label": "LGPD", "any_of": ["LGPD", "privacidade de dados"]},
+        {"label": "ética e compliance", "any_of": ["ética e compliance", "ética", "compliance"]},
+        {"label": "nota mínima 7", "any_of": ["nota mínima 7", "nota 7", "nota mínima exigida nas provas de cada módulo é 7"]}
+      ],
+      "forbidden_claims": ["nota mínima 5"]
+    },
+    {
+      "id": "acidente-fluxo",
+      "category": "procedure",
+      "question": "Sofri um acidente sem afastamento. O que faço e em que ordem?",
+      "answerable": true,
+      "expected_answer": "Acione primeiro o atendimento de emergência e comunique gestor e RH no mesmo dia para emissão da CAT.",
+      "expected_sources": ["saude-seguranca.md", "manual-compliance-2026.md"],
+      "expected_evidence": ["no mesmo dia", "emissão da CAT"],
+      "required_facts": [
+        {"label": "emergência primeiro", "any_of": ["emergência deve ser acionado primeiro", "atendimento de emergência primeiro", "acionar primeiro o atendimento de emergência"]},
+        {"label": "comunicar gestor e RH", "any_of": ["gestor e ao RH", "gestor e RH"]},
+        {"label": "no mesmo dia", "any_of": ["no mesmo dia"]},
+        {"label": "emitir CAT", "any_of": ["emissão da CAT", "emitir a CAT", "CAT seja emitida"]}
+      ],
+      "forbidden_claims": ["somente se houver afastamento"]
+    },
+    {
+      "id": "neg-plr", "category": "unanswerable", "question": "Qual é o percentual da PLR anual?",
+      "answerable": false, "expected_answer": null, "expected_sources": [], "expected_evidence": [],
+      "required_facts": [], "forbidden_claims": ["PLR é de", "percentual da PLR", "participação nos lucros é de"]
+    },
+    {
+      "id": "neg-plano-odontologico", "category": "unanswerable", "question": "Qual operadora fornece o plano odontológico?",
+      "answerable": false, "expected_answer": null, "expected_sources": [], "expected_evidence": [],
+      "required_facts": [], "forbidden_claims": ["operadora do plano odontológico", "plano odontológico é"]
+    },
+    {
+      "id": "neg-auxilio-combustivel", "category": "near_miss", "question": "Qual é o valor mensal do auxílio-combustível para ir ao escritório?",
+      "answerable": false, "expected_answer": null, "expected_sources": [], "expected_evidence": [],
+      "required_facts": [], "forbidden_claims": ["auxílio-combustível é de", "valor mensal é"]
+    },
+    {
+      "id": "neg-bolsa-faculdade", "category": "near_miss", "question": "A empresa paga qual percentual da mensalidade da faculdade?",
+      "answerable": false, "expected_answer": null, "expected_sources": [], "expected_evidence": [],
+      "required_facts": [], "forbidden_claims": ["mensalidade da faculdade", "percentual da faculdade"]
+    },
+    {
+      "id": "neg-home-exterior", "category": "near_miss", "question": "Posso morar fora do Brasil e continuar em home office?",
+      "answerable": false, "expected_answer": null, "expected_sources": [], "expected_evidence": [],
+      "required_facts": [], "forbidden_claims": ["pode morar fora", "home office internacional é permitido"]
+    },
+    {
+      "id": "neg-venda-ferias", "category": "near_miss", "question": "Quantos dias de férias posso vender para a empresa?",
+      "answerable": false, "expected_answer": null, "expected_sources": [], "expected_evidence": [],
+      "required_facts": [], "forbidden_claims": ["pode vender", "vender 10 dias", "abono pecuniário"]
+    },
+    {
+      "id": "neg-stock-options", "category": "unanswerable", "question": "Depois de quanto tempo recebo stock options?",
+      "answerable": false, "expected_answer": null, "expected_sources": [], "expected_evidence": [],
+      "required_facts": [], "forbidden_claims": ["stock options após", "recebe stock options"]
+    },
+    {
+      "id": "neg-pet", "category": "unanswerable", "question": "O benefício pet cobre vacina e consulta veterinária?",
+      "answerable": false, "expected_answer": null, "expected_sources": [], "expected_evidence": [],
+      "required_facts": [], "forbidden_claims": ["benefício pet cobre", "plano pet cobre"]
+    }
+  ]
+}
